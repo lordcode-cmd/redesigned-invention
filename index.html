@@ -1,1 +1,77 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movable Pixel Canvas</title>
+  <style>
+    #canvas-container {
+      position: absolute;
+      border: 1px solid #000;
+      overflow: hidden;
+    }
+    .pixel {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <script>
+    async function loadCanvas() {
+      // Fetch the JSON data
+      const response = await fetch('data.json');
+      const jsonData = await response.json();
+
+      // Extract canvas properties
+      const { position, size } = jsonData.canvas;
+      const pixels = jsonData.pixels;
+
+      // Set up the canvas container
+      const canvasContainer = document.getElementById('canvas-container');
+      canvasContainer.style.left = `${position.x}px`;
+      canvasContainer.style.top = `${position.y}px`;
+      canvasContainer.style.width = `${size.width}px`;
+      canvasContainer.style.height = `${size.height}px`;
+
+      // Add pixels as divs
+      pixels.forEach(pixel => {
+        const pixelDiv = document.createElement('div');
+        pixelDiv.classList.add('pixel');
+        pixelDiv.style.left = `${pixel.x}px`;
+        pixelDiv.style.top = `${pixel.y}px`;
+        pixelDiv.style.backgroundColor = pixel.color;
+        canvasContainer.appendChild(pixelDiv);
+      });
+
+      // Add drag functionality
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      canvasContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - canvasContainer.offsetLeft;
+        offsetY = e.clientY - canvasContainer.offsetTop;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          canvasContainer.style.left = `${e.clientX - offsetX}px`;
+          canvasContainer.style.top = `${e.clientY - offsetY}px`;
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+    }
+
+    // Load the canvas on page load
+    window.onload = loadCanvas;
+  </script>
+</body>
+</html>
